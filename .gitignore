@@ -1,0 +1,5 @@
+.vscode/settings.json
+go-green/
+uploads/
+node_modules/
+config.env
