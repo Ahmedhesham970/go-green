@@ -11,7 +11,9 @@ const jwt = require("jsonwebtoken");
 const apiError = require("../utils/ApiError");
 const auth = require("../middleware/verifyToken");
 const sendEmail = require("../utils/sendMail");
-
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const passport = require("passport");
+const createPayload =require('../middleware/verifyToken')
 const { emailMessage } = require("../utils/emailVerficationMessage");
 
 require("dotenv").config();
@@ -20,7 +22,7 @@ const createToken = (payload) =>
   jwt.sign(payload, process.env.JWT_SECRET_KEY, {
     expiresIn: "90d",
   });
-//@desc create user and send the verification code 
+//@desc create user and send the verification code
 //@route POST /api/user/register
 //Access public
 exports.createUser = asyncHandler(async (req, res, next) => {
@@ -34,7 +36,7 @@ exports.createUser = asyncHandler(async (req, res, next) => {
   }
 
   // 3. Hash the password
-  const saltRounds = 8; // Adjust as needed
+  const saltRounds = 8; 
   const hashedPassword = await bcrypt.hash(password, saltRounds);
 
   // 4. Check if image exists in request
@@ -64,13 +66,13 @@ exports.createUser = asyncHandler(async (req, res, next) => {
       throw new ApiError("This user already exists", 409);
     }
   } catch (error) {
-    return next(error); // Forward the error to central error handler
+    return next(error); 
   }
 
   // 8. Save the user and send response
   try {
     newUser.emailVerified == false;
-    const emailRandomKey = Math.floor(1000 + Math.random() * 9000).toString(); // Convert number to string
+    const emailRandomKey = Math.floor(1000 + Math.random() * 9000).toString(); 
     newUser.emailRandomKey = emailRandomKey;
     const saltRounds = 8;
 
@@ -90,17 +92,17 @@ exports.createUser = asyncHandler(async (req, res, next) => {
         email: newUser.email,
         subject: `Hi ${newUser.name},This is a verification Code for Your Account`,
         message: `
-    Dear ${userName},
+Dear ${userName},
 
-    You are receiving this email because you requested to verify your account with GoGreen. Please use the following verification code to complete the process:
+You are receiving this email because you requested to verify your account with GoGreen. Please use the following verification code to complete the process:
 
-    Verification Code: ${verificationCode}
+Verification Code: ${verificationCode}
 
-    If you did not request this verification, please ignore this email. Thank you for using GoGreen.
+If you did not request this verification, please ignore this email. Thank you for using GoGreen.
 
-    Best regards,
-    GoGreen Team
-    `,
+Best regards,
+GoGreen Team
+`,
       });
     } catch (err) {
       // Assuming you're using Express, you can use `next` to pass the error to the error-handling middleware.
@@ -174,14 +176,14 @@ exports.logIn = asyncHandler(async (req, res, next) => {
     return next(new apiError("user login failed ,please try again later", 400));
   }
 
-  const checkPassword = await bcrypt.compare(
-    req.body.password,
-    loggedIn.password
-  );
+  // const checkPassword = await bcrypt.compare(
+  //   req.body.password,
+  //   loggedIn.password
+  // );
 
-  if (!checkPassword) {
-    return next(new apiError("user login failed ,please try again later", 400));
-  }
+  // if (!checkPassword) {
+  //   return next(new apiError("user login failed ,please try again later", 400));
+  // }
 
   if (loggedIn.emailVerified != true) {
     return next(
@@ -196,85 +198,16 @@ exports.logIn = asyncHandler(async (req, res, next) => {
     // Save the updated user data
     await loggedIn.save();
 
-    const payload = createToken({
+    const payload = createPayload.createToken({
       role: loggedIn.role,
       id: loggedIn.id,
     });
-
+    // console.log(payload);
     return res.status(200).send({
       message: "Logged In Successfully!",
-      token: payload,
+      token:payload,
     });
   }
 });
-// @desc    Show the users
-// @route   GET /api/allusers
-// Access   Public
-exports.allUsers = asyncHandler(async (req, res, next) => {
-  const findAll = user
-    .find()
-    .select("-__v -password")
-    .then((data) => {
-      res.status(200).json({ success: true, count: data.length, data });
-    });
-});
-// @desc    follow the users
-// @route   POST /api/follow
-// Access   Public
-exports.follow = asyncHandler(async (req, res, next) => {
-  const User = await user.findById(req.user.id);
-  console.log("user following :", User.following);
-  // console.log("request user", req.user);
-  const userWhoFollowed = await user.findById(req.params.id);
-  console.log("followers for user:", userWhoFollowed.followers);
-  if(req.user.id==req.params.id){
-    throw new apiError('You cannot follow yourself',405)
-  }
-  if (User.following.includes(userWhoFollowed.id)) {
-   throw new apiError(
-      `You have already followed ${userWhoFollowed.name}`,
-      400
-    );
-  }
- 
-
-  await User.updateOne({ $push: { following: userWhoFollowed } });
-  await userWhoFollowed.updateOne({ $push: { followers: User } });
-  console.log("user following after :", User.following);
-  console.log("followers for user after :", userWhoFollowed.followers);
-
-  return res.json({
-    success: true,
-    message: `You are now following ${userWhoFollowed.name}`,
-  });
-});
-// @desc    unfollow the users
-// @route   POST /api/unfollow
-// Access   Public
-exports.unfollow = asyncHandler(async (req, res, next) => {
-  const User = await user.findById(req.user.id);
-  console.log("user following :", User.following);
-  // console.log("request user", req.user);
-  const userUnFollowed = await user.findById(req.params.id);
-  console.log("followers for user:", userUnFollowed.followers);
-  if (req.user.id == req.params.id) {
-    throw new apiError("You cannot unfollow yourself", 405);
-  }
-  if (!User.following.includes(userUnFollowed.id)) {
-    throw new apiError(`You have not follow ${userUnFollowed.name}`, 400);
-  }
 
 
-
-
-
-  await User.updateOne({ $pull: { following: userUnFollowed.id } });
-  await userUnFollowed.updateOne({ $pull: { followers: User.id } });
-  console.log("user following after :", User.following);
-  console.log("followers for user after :", userUnFollowed.followers);
-
-  return res.json({
-    success: true,
-    message: `You unfollow ${userUnFollowed.name}`,
-  });
-});

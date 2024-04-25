@@ -14,7 +14,7 @@ require("dotenv").config();
 
 //token creation
  exports.createToken = (payload) =>
-  jwt.sign( {payload} , process.env.JWT_SECRET_KEY, {
+  jwt.sign( payload , process.env.JWT_SECRET_KEY, {
     expiresIn: "90d",
   });
 

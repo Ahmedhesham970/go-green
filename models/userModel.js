@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema(
       required: [true, "Email is required"],
       unique: [true, "Email must be unique"],
     },
+    google_id: {type:String},
     profileImage: {
       type: String,
     },
@@ -65,8 +66,8 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
-      required: [true, "Phone number is required"],
-      unique: [true, "Phone number must be unique"],
+      // required: [true, "Phone number is required"],
+      // unique: [true, "Phone number must be unique"],
     },
     //email configurations
     emailRandomKey: {
@@ -82,8 +83,9 @@ const userSchema = new mongoose.Schema(
       type: Date,
     },
     following: [{ type: mongoose.Types.ObjectId, ref: "User", default: 0 }],
+    
     followers: [{ type: mongoose.Types.ObjectId, ref: "User", default: 0 }],
-    posts: [{ type: mongoose.Types.ObjectId, ref:'post', default:""}],
+    posts: [{ type: mongoose.Types.ObjectId, ref:'Post', default:""}],
     //password configurations
     passwordRandomKey: {
       type: String,

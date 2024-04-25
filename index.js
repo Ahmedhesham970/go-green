@@ -15,13 +15,27 @@ const database = require("./dataBase/dataBase");
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 const userRouter = require("./routers/userRouter");
 const postRouter = require("./routers/postRouter");
-
+const passport = require("passport");
 const articleRouter = require("./routers/articlesRouter");
 const apiError = require("./utils/ApiError");
+require("./middleware/googleAuth");
 app.use(morgan("dev"));
-
+const session = require("express-session");
+const cookieParser = require("cookie-parser");
 app.use("/api/user", userRouter);
 app.use("/api/post", postRouter);
+
+app.use(
+  session({
+    secret: process.env.COOKIE_SESSION_KEY || "your_secret_key",
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
+// Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use("/api/articles", articleRouter);
 

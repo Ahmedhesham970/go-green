@@ -75,13 +75,19 @@ exports.GettingValidation = [
   check("id").isMongoId().withMessage("invalid mongo id"),
   validationResult,
 ];
+//-----------updating validation middleware-----------//
 
 exports.UpdatingValidation = [
   check("id").isMongoId().withMessage("invalid mongo id"),
   validationResult,
 ];
+//-----------deleting validation middleware-----------//
 
 exports.DeletingValidation = [
   check("id").isMongoId().withMessage("invalid mongo id"),
   validationResult,
 ];
+
+
+
+
