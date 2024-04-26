@@ -39,9 +39,9 @@ app.use(passport.session());
 
 app.use("/api/articles", articleRouter);
 
-app.all("*", (req, res, next) => {
+app.all("*", (req, res, next,err) => {
   // const err = new Error);
-  next(new apiError(`cannot access ${req.originalUrl}`));
+  next(new apiError(`cannot access ${req.originalUrl} : ${err.message} `));
 });
 app.use(globalError);
 
