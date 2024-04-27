@@ -200,9 +200,7 @@ exports.getAllComments = asyncHandler(async (req, res) => {
     .populate({path: "comments.user",select: "name profileImage -_id"})
     .select({ path: "comments.comment", select: "-id" });
     
-   post.pre((comment) => {
-      return comment._id;
-    });
+ 
 
     // console.warn(commentsMap)
   //  console.log(post.comments);
