@@ -1,6 +1,8 @@
 const multer = require("multer");
 const ApiError = require("../utils/ApiError");
 const validationResult = require("../utils/validationRules");
+const apiError = require("../utils/ApiError");
+const cloudinary=require("../utils/cloudinaryConfig")
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "./uploads");
@@ -24,12 +26,26 @@ const fileFilter = (req, file, cb, next) => {
 const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 const uploadFile = (fieldName) => (req, res, next) => {
+  // Handle multer file upload
   upload.single(fieldName)(req, res, (err) => {
     if (err) {
-      return res.status(400).send({ error: err });
+      return next(new ApiError(err.message, 400));
     }
 
-    next();
+    // If multer upload is successful, proceed to Cloudinary upload
+    cloudinary.uploader.upload(req.file.path, (cloudErr, result) => {
+      if (cloudErr) {
+        // If Cloudinary upload fails, return error
+        return next(new ApiError(cloudErr.message, 400));
+      }
+
+      // If Cloudinary upload is successful, attach Cloudinary URL to request object
+      req.cloudinaryUrl = result.secure_url;
+
+      // Proceed to the next middleware
+      next();
+    });
   });
 };
+
 module.exports = uploadFile;

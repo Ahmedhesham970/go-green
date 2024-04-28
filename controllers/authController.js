@@ -90,27 +90,33 @@ exports.createUser = asyncHandler(async (req, res, next) => {
       await sendEmail({
         name: newUser.name,
         email: newUser.email,
-        subject: `Hi ${newUser.name},This is a verification Code for Your Account`,
+        subject: `Hi ${newUser.name}, This is a verification Code for Your Account`,
         message: `
-Dear ${userName},
+      Dear ${newUser.name},
 
-You are receiving this email because you requested to verify your account with GoGreen. Please use the following verification code to complete the process:
+      You are receiving this email because you requested to verify your account with GoGreen. Please use the following verification code to complete the process:
 
-Verification Code: ${verificationCode}
+      Verification Code: ${verificationCode}
 
-If you did not request this verification, please ignore this email. Thank you for using GoGreen.
+      If you did not request this verification, please ignore this email. Thank you for using GoGreen.
 
-Best regards,
-GoGreen Team
-`,
+      Best regards,
+      GoGreen Team
+    `,
       });
-    } catch (err) {
-      // Assuming you're using Express, you can use `next` to pass the error to the error-handling middleware.
-      next(new apiError("error in sending code", 500));
-    }
 
+      await newUser.save();
+
+      return res.status(201).send({ message: "Registration successful" });
+    } catch (err) {
+      // Log the error
+      console.error("Error sending email:", err.message);
+
+      // Forward the error to central error handler
+      return next(new apiError(`Error in sending code: ${err.message}`, 500));
+    }
     await newUser.save();
-    res.status(201).send({ message: "Registration successful" });
+   return res.status(201).send({ message: "Registration successful" });
 
     // const payload = createToken({
     //   newUser: {

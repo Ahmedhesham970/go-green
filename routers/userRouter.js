@@ -48,7 +48,7 @@ router
   .route("/register")
   .post(uploadUserProfileImage, AddingUserValidation, auth.createUser);
 router.route("/login").post( LoginValidator, auth.logIn);
-
+router.post("/verifyemail",auth.verifyEmail);
 router.put("/:id/follow", authorized.auth, user.follow);
 router.put("/:id/unfollow", authorized.auth, user.unfollow);
 router.get("/profile", authorized.auth, user.showProfile);

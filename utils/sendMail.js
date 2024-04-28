@@ -1,35 +1,33 @@
 const nodemailer = require("nodemailer");
-const express = require("express");
-const user = require("../controllers/authController");
-const { options } = require("../routers/userRouter");
 require("dotenv").config();
 
-const sendEmail = async (options) => {
+const sendEmail = async function (options) {
   try {
     // 1) Create transporter and send email
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 465,
-      secure: true, // upgrade later with STARTTLS and attach certs.
+      secure: true,
       auth: {
-        user: "googreen2024@gmail.com",
-        pass: "lepv acbn gsbn zpcm",
-        //
-        //
+        user: process.env.MAILER_EMAIL, // Corrected
+        pass: process.env.MAILER_PASSWORD, // Corrected
       },
     });
 
-    // 2) define how the message should be sent
+    // 2) Define how the message should be sent
     const emailOptions = {
       from: "GoGreen <noreply@gogreen.com>",
       to: options.email,
       subject: options.subject,
       text: options.message,
     };
-    // 3) send the email
-    transporter.sendMail(emailOptions);
+
+    // 3) Send the email
+    await transporter.sendMail(emailOptions); // Ensure to await sending email
   } catch (err) {
-    console.log(err.message);
+    console.error("Error sending email:", err.message);
+    throw err; // Rethrow the error to be handled by the caller
   }
 };
+
 module.exports = sendEmail;

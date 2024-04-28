@@ -37,7 +37,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use("/api/articles", articleRouter);
+
 
 app.all("*", (req, res, next,err) => {
   // const err = new Error);
