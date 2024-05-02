@@ -4,7 +4,12 @@ const authToken = require("../middleware/verifyToken");
 const user = require("../controllers/userController");
 const auth = require("../controllers/authController");
 const password = require("../controllers/passwordConfigrations");
+const upload=require('../middleware/multerConfig')
+const uploaded=upload('profileImage')
 const apiError = require("../utils/ApiError");
+const ApiError = require("../utils/ApiError");
+const cloudinary=require("../utils/cloudinaryConfig")
+
 const passport = require("passport");
 const googleAuth = require("../middleware/googleAuth");
 const authRole = require("../middleware/AuthRole");
@@ -16,8 +21,8 @@ const {
 const uploadFile = require("../middleware/multerConfig");
 const { validationResult } = require("express-validator");
 const authorized = require("../middleware/verifyToken");
-const uploadUserProfileImage = uploadFile("profileImage");
 require("../middleware/googleAuth");
+const multer=require('../middleware/multer.js')
 router.get(
   "/auth/google",
   passport.authenticate("google", { scope: ["email", "profile"] })
@@ -25,7 +30,7 @@ router.get(
 router.get(
   "/auth/google/callback",
   passport.authenticate("google", { session: false }),
-  (req, res) => {
+  (req, res,next) => {
     // Handle successful authentication
 
     const payload = authToken.createToken({
@@ -44,9 +49,22 @@ router.get(
   }
 );
 
-router
-  .route("/register")
-  .post(uploadUserProfileImage, AddingUserValidation, auth.createUser);
+router.post("/register", multer,async (req, res, next) => {
+ try {
+   const cloudinaryResult = await cloudinary.uploader
+     .upload_stream(
+       {
+         resource_type: "auto",
+       }
+  ).end(req.file.buffer);
+ } catch (error) {
+   console.error(`Cloudinary error: \n ${error}`);
+   return next(
+     new ApiError(`Failed to upload file to Cloudinary ${error}`, 400)
+   );
+ }
+  next();
+},AddingUserValidation, auth.createUser);
 router.route("/login").post( LoginValidator, auth.logIn);
 router.post("/verifyemail",auth.verifyEmail);
 router.put("/:id/follow", authorized.auth, user.follow);

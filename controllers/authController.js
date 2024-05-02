@@ -13,7 +13,7 @@ const auth = require("../middleware/verifyToken");
 const sendEmail = require("../utils/sendMail");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const passport = require("passport");
-const createPayload =require('../middleware/verifyToken')
+const createPayload = require("../middleware/verifyToken");
 const { emailMessage } = require("../utils/emailVerficationMessage");
 
 require("dotenv").config();
@@ -36,7 +36,7 @@ exports.createUser = asyncHandler(async (req, res, next) => {
   }
 
   // 3. Hash the password
-  const saltRounds = 8; 
+  const saltRounds = 8;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
 
   // 4. Check if image exists in request
@@ -66,13 +66,13 @@ exports.createUser = asyncHandler(async (req, res, next) => {
       throw new ApiError("This user already exists", 409);
     }
   } catch (error) {
-    return next(error); 
+    return next(error);
   }
 
   // 8. Save the user and send response
   try {
     newUser.emailVerified == false;
-    const emailRandomKey = Math.floor(1000 + Math.random() * 9000).toString(); 
+    const emailRandomKey = Math.floor(1000 + Math.random() * 9000).toString();
     newUser.emailRandomKey = emailRandomKey;
     const saltRounds = 8;
 
@@ -109,14 +109,13 @@ exports.createUser = asyncHandler(async (req, res, next) => {
 
       return res.status(201).send({ message: "Registration successful" });
     } catch (err) {
-      // Log the error
+      // Assuming you're using Express, you can use `next` to pass the error to the error-handling middleware.
       console.error("Error sending email:", err.message);
-
-      // Forward the error to central error handler
-      return next(new apiError(`Error in sending code: ${err.message}`, 500));
+      next(new apiError(`error in sending code${err}`, 500));
     }
+
     await newUser.save();
-   return res.status(201).send({ message: "Registration successful" });
+    return res.status(201).send({ message: "Registration successful" });
 
     // const payload = createToken({
     //   newUser: {
@@ -211,9 +210,7 @@ exports.logIn = asyncHandler(async (req, res, next) => {
     // console.log(payload);
     return res.status(200).send({
       message: "Logged In Successfully!",
-      token:payload,
+      token: payload,
     });
   }
 });
-
-

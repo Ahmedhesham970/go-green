@@ -17,9 +17,11 @@ const userSchema = new mongoose.Schema(
       required: [true, "Email is required"],
       unique: [true, "Email must be unique"],
     },
-    google_id: {type:String},
+    google_id: { type: String },
     profileImage: {
       type: String,
+      default:
+        "https://www.bing.com/images/search?view=detailV2&ccid=mP1RB8xu&id=ACC717494762E9BF88EF1A028CDAA43B2CBAC7FF&thid=OIP.mP1RB8xuQaHAvUkonYY6HwHaHK&mediaurl=https%3a%2f%2fwww.pngall.com%2fwp-content%2fuploads%2f5%2fUser-Profile-PNG.png&cdnurl=https%3a%2f%2fth.bing.com%2fth%2fid%2fR.98fd5107cc6e41a1c0bd49289d863a1f%3frik%3d%252f8e6LDuk2owCGg%26pid%3dImgRaw%26r%3d0&exph=812&expw=840&q=userprofile&simid=608015495525840768&FORM=IRPRST&ck=FDAD693058582A6FFDEE8580B4065C2F&selectedIndex=11&itb=1&ajaxhist=0&ajaxserp=0",
     },
     password: {
       type: String,
@@ -83,9 +85,9 @@ const userSchema = new mongoose.Schema(
       type: Date,
     },
     following: [{ type: mongoose.Types.ObjectId, ref: "User", default: 0 }],
-    
+
     followers: [{ type: mongoose.Types.ObjectId, ref: "User", default: 0 }],
-    posts: [{ type: mongoose.Types.ObjectId, ref:'Post', default:""}],
+    posts: [{ type: mongoose.Types.ObjectId, ref: "Post", default: "" }],
     //password configurations
     passwordRandomKey: {
       type: String,

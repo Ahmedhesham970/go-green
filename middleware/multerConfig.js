@@ -3,17 +3,13 @@ const ApiError = require("../utils/ApiError");
 const validationResult = require("../utils/validationRules");
 const apiError = require("../utils/ApiError");
 const cloudinary=require("../utils/cloudinaryConfig")
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./uploads");
-  },
-  filename: (req, file, cb) => {
-    const picExtension = file.mimetype.split("/")[1];
-    const picName = `user-${Date.now()}.${picExtension}`;
-    // req.file.profileImage = picName;
-    cb(null, picName);
-  },
-});
+const express = require("express");
+const router=express.Router()
+
+
+
+const storage = multer.memoryStorage();
+
 const fileFilter = (req, file, cb, next) => {
   const imgType = file.mimetype.split("/")[0];
   if (imgType != "image") {
@@ -25,26 +21,24 @@ const fileFilter = (req, file, cb, next) => {
 
 const upload = multer({ storage: storage, fileFilter: fileFilter });
 
-const uploadFile = (fieldName) => (req, res, next) => {
+const uploadFile = (fieldName) => async(req, res, next) => {
   // Handle multer file upload
-  upload.single(fieldName)(req, res, (err) => {
+  upload.single(fieldName)(req,res, async (file,err) => {
     if (err) {
       return next(new ApiError(err.message, 400));
     }
 
     // If multer upload is successful, proceed to Cloudinary upload
-    cloudinary.uploader.upload(req.file.path, (cloudErr, result) => {
-      if (cloudErr) {
-        // If Cloudinary upload fails, return error
-        return next(new ApiError(cloudErr.message, 400));
-      }
-
-      // If Cloudinary upload is successful, attach Cloudinary URL to request object
-      req.cloudinaryUrl = result.secure_url;
-
-      // Proceed to the next middleware
-      next();
-    });
+    try {
+      // If multer upload is successful, proceed to Cloudinary upload
+  let cloudinaryResult= cloudinary.uploader.upload_stream(req.files.buffer)
+   console.log({cloudinaryResult})
+          next();
+    } catch (error) {
+      // If Cloudinary upload fails, return error
+      console.error(`Cloudinary error: \n ${error}`);
+      return next(new ApiError(`Failed to upload file to Cloudinary${error}`, 400));
+    }
   });
 };
 
