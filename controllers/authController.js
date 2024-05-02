@@ -40,9 +40,9 @@ exports.createUser = asyncHandler(async (req, res, next) => {
   const hashedPassword = await bcrypt.hash(password, saltRounds);
 
   // 4. Check if image exists in request
-  if (!req.file) {
-    return res.status(400).send("Please upload a profile image");
-  }
+  // if (!req.file) {
+  //   return res.status(400).send("Please upload a profile image");
+  // }
 
   // 5. Get the uploaded image path
   const profileImage = req.file.path;
