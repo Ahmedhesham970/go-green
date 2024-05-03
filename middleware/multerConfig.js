@@ -8,7 +8,14 @@ const router=express.Router()
 
 
 
-const storage = multer.memoryStorage();
+const storage = multer.diskStorage({
+  filename: (req, file, cb) => {
+    const picExtension = file.mimetype.split("/")[1];
+    const picName = `user-${Date.now()}.${picExtension}`;
+    // req.file.profileImage = picName;
+    cb(null, picName);
+  },
+});
 
 const fileFilter = (req, file, cb, next) => {
   const imgType = file.mimetype.split("/")[0];
@@ -21,25 +28,6 @@ const fileFilter = (req, file, cb, next) => {
 
 const upload = multer({ storage: storage, fileFilter: fileFilter });
 
-const uploadFile = (fieldName) => async(req, res, next) => {
-  // Handle multer file upload
-  upload.single(fieldName)(req,res, async (file,err) => {
-    if (err) {
-      return next(new ApiError(err.message, 400));
-    }
 
-    // If multer upload is successful, proceed to Cloudinary upload
-    try {
-      // If multer upload is successful, proceed to Cloudinary upload
-  let cloudinaryResult= cloudinary.uploader.upload_stream(req.files.buffer)
-   console.log({cloudinaryResult})
-          next();
-    } catch (error) {
-      // If Cloudinary upload fails, return error
-      console.error(`Cloudinary error: \n ${error}`);
-      return next(new ApiError(`Failed to upload file to Cloudinary${error}`, 400));
-    }
-  });
-};
 
-module.exports = uploadFile;
+module.exports = upload;

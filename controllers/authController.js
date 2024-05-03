@@ -15,6 +15,8 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const passport = require("passport");
 const createPayload = require("../middleware/verifyToken");
 const { emailMessage } = require("../utils/emailVerficationMessage");
+const cloudinary= require("cloudinary").v2;
+
 
 require("dotenv").config();
 
@@ -34,7 +36,7 @@ exports.createUser = asyncHandler(async (req, res, next) => {
   if (password !== confirmPassword) {
     return next(new apiError("Invalid password confirmation.", 400));
   }
-
+let profileImage=req.file.buffer.toLocaleString()
   // 3. Hash the password
   const saltRounds = 8;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -45,7 +47,9 @@ exports.createUser = asyncHandler(async (req, res, next) => {
   // }
 
   // 5. Get the uploaded image path
-  const profileImage = req.file.path;
+   
+
+
 
   // 6. Create a new user object
   const newUser = new user({
@@ -54,7 +58,7 @@ exports.createUser = asyncHandler(async (req, res, next) => {
     password: hashedPassword,
     confirmPassword,
     phone,
-    profileImage,
+    profileImage: profileImage,
     role,
     governorate,
   });
@@ -214,3 +218,33 @@ exports.logIn = asyncHandler(async (req, res, next) => {
     });
   }
 });
+
+exports.resizeImage = asyncHandler(async(req,res,next) => {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_key,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true,
+  });
+  if(req.file.buffer){
+  const picExtension = req.file.mimetype.split("/")[1];
+    const picName = `user-${Date.now()}.${picExtension}`;
+    const result = await cloudinary.uploader.upload_stream(
+      picName,
+      {
+        folder: "users",
+        quality: "auto:best",
+      },
+      (result, error) => {
+        if(error){
+          console.log(error);
+          throw next(new apiError(error, 500));
+        }
+        const url=result.secure_url
+        req.body.profileImage = url
+
+      }
+    );
+  }
+  const url = result.secure_url
+})

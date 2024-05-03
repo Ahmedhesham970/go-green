@@ -13,7 +13,14 @@ const router = express.Router();
 //     cb(null, picName);
 //   },
 // };
-const storage = multer.memoryStorage();
+const storage = multer.memoryStorage({
+  filename: (req, file, cb) => {
+    const picExtension = file.mimetype.split("/")[1];
+    const picName = `user-${Date.now()}.${picExtension}`;
+     req.file.profileImage = picName;
+    cb(null, picName);
+  },
+});
 
 const fileFilter = (req, file, cb, next) => {
   const imgType = file.mimetype.split("/")[0];
@@ -24,6 +31,6 @@ const fileFilter = (req, file, cb, next) => {
   }
 };
 
-const upload = multer({ storage: storage, fileFilter: fileFilter }).single("profileImage");
+const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 module.exports =upload;

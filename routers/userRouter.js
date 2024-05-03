@@ -4,11 +4,11 @@ const authToken = require("../middleware/verifyToken");
 const user = require("../controllers/userController");
 const auth = require("../controllers/authController");
 const password = require("../controllers/passwordConfigrations");
-const upload=require('../middleware/multerConfig')
-const uploaded=upload('profileImage')
+const upload = require("../middleware/multer");
 const apiError = require("../utils/ApiError");
 const ApiError = require("../utils/ApiError");
-const cloudinary=require("../utils/cloudinaryConfig")
+const cloudinary = require("../utils/cloudinaryConfig");
+const stream = require("stream");
 
 const passport = require("passport");
 const googleAuth = require("../middleware/googleAuth");
@@ -22,7 +22,6 @@ const uploadFile = require("../middleware/multerConfig");
 const { validationResult } = require("express-validator");
 const authorized = require("../middleware/verifyToken");
 require("../middleware/googleAuth");
-const multer=require('../middleware/multer.js')
 router.get(
   "/auth/google",
   passport.authenticate("google", { scope: ["email", "profile"] })
@@ -30,7 +29,7 @@ router.get(
 router.get(
   "/auth/google/callback",
   passport.authenticate("google", { session: false }),
-  (req, res,next) => {
+  (req, res, next) => {
     // Handle successful authentication
 
     const payload = authToken.createToken({
@@ -40,8 +39,6 @@ router.get(
       id: req.user.google_id,
     });
 
-   
-
     return res.status(200).send({
       message: "Logged In Successfully!",
       token: payload,
@@ -49,24 +46,61 @@ router.get(
   }
 );
 
-router.post("/register", multer,async (req, res, next) => {
- try {
-   const cloudinaryResult = await cloudinary.uploader
-     .upload_stream(
-       {
-         resource_type: "auto",
-       }
-  ).end(req.file.buffer);
- } catch (error) {
-   console.error(`Cloudinary error: \n ${error}`);
-   return next(
-     new ApiError(`Failed to upload file to Cloudinary ${error}`, 400)
-   );
- }
-  next();
-},AddingUserValidation, auth.createUser);
-router.route("/login").post( LoginValidator, auth.logIn);
-router.post("/verifyemail",auth.verifyEmail);
+router.route("/register").post(
+  upload.single("profileImage"),
+  async (req, res, next) => {
+    try {
+      // Ensure there is a file in the request
+      if (!req.file) {
+        throw new ApiError("No file uploaded.");
+      }
+
+      let profileImage = req.file.buffer; // Directly use the buffer
+      const cloudinaryResult = await cloudinary.uploader.upload_stream(
+        {},
+        (error, result) => {
+          if (error) {
+            return new ApiError(error.message);
+          } else {
+            console.log("Upload successful:", result.secure_url);
+            req.file.buffer = result.secure_url; // Store the URL, not the buffer
+            next();
+          }
+        }
+      );
+
+      // Create a stream and pipe the buffer to Cloudinary
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: "users",
+          quality: "auto:best",
+        },
+        (error, result) => {
+          if (error) {
+            throw error;
+          } else {
+            console.log("Upload successful:", result.secure_url);
+            req.file.buffer = result.secure_url; // Store the URL, not the buffer
+            next();
+          }
+        }
+      );
+
+      const bufferStream = new stream.PassThrough();
+      bufferStream.end(profileImage);
+      bufferStream.pipe(uploadStream);
+    } catch (error) {
+      console.error(`Cloudinary error: \n ${error}`);
+      return next(
+        new ApiError(`Failed to upload file to Cloudinary ${error}`, 400)
+      );
+    }
+  },
+  AddingUserValidation,
+  auth.createUser
+);
+router.route("/login").post(LoginValidator, auth.logIn);
+router.post("/verifyemail", auth.verifyEmail);
 router.put("/:id/follow", authorized.auth, user.follow);
 router.put("/:id/unfollow", authorized.auth, user.unfollow);
 router.get("/profile", authorized.auth, user.showProfile);
