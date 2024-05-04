@@ -46,9 +46,7 @@ router.get(
   }
 );
 
-router
-  .route("/register")
-  .post(
+router.route("/register").post(
     upload.single("profileImage"),
     uploadImage,
     AddingUserValidation,

@@ -21,8 +21,8 @@ exports.createPost = asyncHandler(async (req, res, next) => {
     const { caption } = req.body;
     // console.log(req.user);
     const publisher = req.user.id;
-    const imagePath = req.file.path;
-    const images = `${process.env.ORIGINAL_URL}${imagePath}`;
+    let profileImage = req.file.buffer
+    console.log(profileImage);
     const user = await User.findById(req.user.id);
     // console.log(user);
     var date = new Date();
@@ -33,13 +33,13 @@ exports.createPost = asyncHandler(async (req, res, next) => {
     const post = await POST.create({
       publisher: publisher,
       caption: caption,
-      images,
+      images:profileImage,
       createdAt: timeAndDate,
     });
 
     // console.log(population);
 
-    if (!images) {
+    if (!profileImage) {
       throw new apiError(
         "Please upload at least one image to publish the post",
         400
