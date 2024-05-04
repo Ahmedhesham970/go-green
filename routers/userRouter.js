@@ -39,8 +39,9 @@ router.get(
       id: req.user.google_id,
     });
 
-    return res.status(200).send({
-      message: "Logged In Successfully!",
+    res.status(200).json({
+      message: "logging in successful",
+      user: { email: req.user.email, name: req.user.name, role: req.user.role },
       token: payload,
     });
   }

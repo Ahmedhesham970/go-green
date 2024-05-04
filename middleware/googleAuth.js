@@ -20,11 +20,19 @@ passport.use(
     {
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: "http://localhost:2000/api/user/auth/google/callback",
+      callbackURL:
+        "https://go-green-3w65.onrender.com/api/user/auth/google/callback",
       passReqToCallback: true,
       scope: ["profile", "email", "offline_access"],
     },
-    async function (request, response,accessToken, refreshToken, profile, done) {
+    async function (
+      request,
+      response,
+      accessToken,
+      refreshToken,
+      profile,
+      done
+    ) {
       // Log the profile information to the console
       // console.log("Email:", profile.emails[0].value);
       // console.log("Name:", profile.displayName);
@@ -40,9 +48,8 @@ passport.use(
         (Math.random() + 2).toString(36).substring(7).toUpperCase() +
         process.env.GOOGLE_PASSWORD_COMPILATION;
       const user = await User.findOne({ google_id: profile.id });
-          
 
-           newUser.emailVerified = true;
+      //  newUser.emailVerified = true;
       if (!user) {
         const newUser = await User.create({
           email: email,
@@ -50,10 +57,8 @@ passport.use(
           google_id: profile.id,
           profileImage: profileImageURL,
           password: random,
-         
         });
-  
-       
+
         await newUser.save();
         const payload = authToken.createToken({
           email: newUser.email,
@@ -63,6 +68,7 @@ passport.use(
         });
         // return payload
 
+        console.log("new user token :", payload);
       } else {
         const payload = authToken.createToken({
           email: user.email,
@@ -71,7 +77,7 @@ passport.use(
           id: user.google_id,
         });
 
-         console.log('existing user token :',payload);
+        console.log("existing user token :", payload);
         //  return payload
         // return res.status(400).send("\n \n user already exists! \n \n ");
       }

@@ -73,66 +73,21 @@ let profileImage=req.file.buffer.toLocaleString()
     return next(error);
   }
 
+  const payload = createPayload.createToken({
+    role: newUser.role,
+    id: newUser.id,
+    name: newUser.name,
+    google_id: newUser.google_id
+  });
+
   // 8. Save the user and send response
-  try {
-    newUser.emailVerified == false;
-    const emailRandomKey = Math.floor(1000 + Math.random() * 9000).toString();
-    newUser.emailRandomKey = emailRandomKey;
-    const saltRounds = 8;
+ await newUser.save();
 
-    const emailHashedKey = await bcrypt.hash(emailRandomKey, saltRounds);
-    newUser.emailHashedKey = emailHashedKey;
-    const emailVerifyExpiresIn = new Date(Date.now() + 10 * 60 * 1000);
-    newUser.emailVerifyExpiresIn = emailVerifyExpiresIn;
-    const userName = newUser.name;
-    const userEmail = newUser.email;
-    const verificationCode = emailRandomKey;
-    if ((newUser.emailVerified = false)) {
-      return new apiError("you must verify your email first", 400);
-    }
-    try {
-      await sendEmail({
-        name: newUser.name,
-        email: newUser.email,
-        subject: `Hi ${newUser.name}, This is a verification Code for Your Account`,
-        message: `
-      Dear ${newUser.name},
-
-      You are receiving this email because you requested to verify your account with GoGreen. Please use the following verification code to complete the process:
-
-      Verification Code: ${verificationCode}
-
-      If you did not request this verification, please ignore this email. Thank you for using GoGreen.
-
-      Best regards,
-      GoGreen Team
-    `,
-      });
-
-      await newUser.save();
-
-      return res.status(201).send({ message: "Registration successful" });
-    } catch (err) {
-      // Assuming you're using Express, you can use `next` to pass the error to the error-handling middleware.
-      console.error("Error sending email:", err.message);
-      next(new apiError(`error in sending code${err}`, 500));
-    }
-
-    await newUser.save();
-    return res.status(201).send({ message: "Registration successful" });
-
-    // const payload = createToken({
-    //   newUser: {
-    //     name: newUser.name,
-    //     pic: `${process.env.ORIGINAL_URL}${profileImage}`, //ORIGINAL_URL is a base URL
-
-    //   email: savedUser.email,
-    //   role: savedUser.role,
-    // });
-    // console.log("token", payload);
-  } catch (error) {
-    return next(error); // Forward the error to central error handler
-  }
+ return res.status(201).json(
+  { message: "Registration successful" ,
+  user:{"email":newUser.email,"name":newUser.name,"role":newUser.role},
+  token:payload
+  });
 });
 
 // @desc  verify the registration
@@ -194,14 +149,7 @@ exports.logIn = asyncHandler(async (req, res, next) => {
   //   return next(new apiError("user login failed ,please try again later", 400));
   // }
 
-  if (loggedIn.emailVerified != true) {
-    return next(
-      new apiError(
-        "Your account email has not been verified yet. Please check your email inbox for the verification code. If you did not receive the email, please check your spam folder or request a new verification email.",
-        403
-      )
-    );
-  } else {
+  
     // Reset passwordResetVerified flag to null
 
     // Save the updated user data
@@ -213,38 +161,10 @@ exports.logIn = asyncHandler(async (req, res, next) => {
     });
     // console.log(payload);
     return res.status(200).send({
-      message: "Logged In Successfully!",
+      message: "Logged in successfully",
+      user: { name: loggedIn.name, email: loggedIn.email, role: loggedIn.role },
       token: payload,
     });
-  }
+  
 });
 
-exports.resizeImage = asyncHandler(async(req,res,next) => {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_key,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-    secure: true,
-  });
-  if(req.file.buffer){
-  const picExtension = req.file.mimetype.split("/")[1];
-    const picName = `user-${Date.now()}.${picExtension}`;
-    const result = await cloudinary.uploader.upload_stream(
-      picName,
-      {
-        folder: "users",
-        quality: "auto:best",
-      },
-      (result, error) => {
-        if(error){
-          console.log(error);
-          throw next(new apiError(error, 500));
-        }
-        const url=result.secure_url
-        req.body.profileImage = url
-
-      }
-    );
-  }
-  const url = result.secure_url
-})
