@@ -64,6 +64,6 @@ router
 router.post("/forgetpassword", password.forgetPassword);
 router.post("/verifypassword", password.verifyPasswordResetCode);
 router.put("/setnewpassword", password.setNewPassword);
-router.route("/allusers").get(authorized.auth, authRole(), user.allUsers);
+router.route("/allusers").get(authorized.auth, authRole(), user.allUsers );
 
 module.exports = router;
