@@ -29,41 +29,37 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
 
 exports.forgetPassword = asyncHandler(async (req, res, next) => {
   // 1) check if the user exists in the database
-  const FindEmail = await user.findOne({ email: req.body.email });
-  if (!FindEmail) {
+  const User = await user.findById(req.user.id);
+  const mail= User.email
+   
+  if (!mail) {
     return next(
       new apiError(
-        `Could not find ${req.body.email} please enter a valid email`,
+        `Could not find ${User.email} please enter a valid email`,
         404
       )
     );
-  }
+  } 
   //  2) generate a random reset random key
-  const passwordRandomKey = (Math.random() + 1)
-    .toString(36)
-    .substring(7)
-    .toUpperCase();
+  const passwordRandomKey = Math.floor(1000 + Math.random() * 9000).toString();
 
-  console.log(passwordRandomKey);
   const saltRounds = 8; // Adjust as needed
   const passwordHashedKey = await bcrypt.hash(passwordRandomKey, saltRounds);
-  console.log(passwordRandomKey);
-  FindEmail.passwordHashedKey = passwordHashedKey;
+  User.passwordHashedKey = passwordHashedKey;
 
   const passwordResetExpiresIn = new Date(Date.now() + 10 * 60 * 1000);
-  console.log(passwordResetExpiresIn);
-  FindEmail.passwordResetExpiresIn = passwordResetExpiresIn;
-  FindEmail.passwordResetExpiresIn = false;
+  User.passwordResetExpiresIn = passwordResetExpiresIn;
+  // FindEmail.passwordResetExpiresIn = false;
   // Save the user
-  FindEmail.save();
+  await User.save();
 
   try {
     await sendEmail({
-      name: FindEmail.name,
-      email: FindEmail.email,
-      subject: `Hi ${FindEmail.name}
+      name: User.name,
+      email: User.email,
+      subject: `Hi ${User.name}
       your password has been updated`,
-      message: `Dear ${FindEmail.name},
+      message: `Dear ${User.name},
 
 We have received a request to reset the password for your account. \n If you did not make this request, please disregard this email \n
 
@@ -111,11 +107,11 @@ exports.verifyPasswordResetCode = asyncHandler(async (req, res, next) => {
 });
 
 exports.setNewPassword = asyncHandler(async (req, res, next) => {
-  const User = await user.findOne({ email: req.body.email });
+  const User = await user.findOne({ email: req.user.email });
 
   if (!User) {
     return next(
-      new apiError(`There is no user with email ${req.body.email}`, 404)
+      new apiError(`There is no user with email ${req.user.email}`, 404)
     );
   }
 
@@ -154,7 +150,7 @@ exports.setNewPassword = asyncHandler(async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: "New password has been set successfully.",
+      message: "verified \n Your account has been verified successfully ",
       token: payload,
     });
   } catch (error) {

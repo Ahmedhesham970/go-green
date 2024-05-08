@@ -77,7 +77,8 @@ let profileImage=req.file.buffer.toLocaleString()
     role: newUser.role,
     id: newUser.id,
     name: newUser.name,
-    google_id: newUser.google_id
+    google_id: newUser.google_id,
+    email: newUser.email
   });
 
   // 8. Save the user and send response
@@ -140,14 +141,14 @@ exports.logIn = asyncHandler(async (req, res, next) => {
     return next(new apiError("user login failed ,please try again later", 400));
   }
 
-  // const checkPassword = await bcrypt.compare(
-  //   req.body.password,
-  //   loggedIn.password
-  // );
+  const checkPassword = await bcrypt.compare(
+    req.body.password,
+    loggedIn.password
+  );
 
-  // if (!checkPassword) {
-  //   return next(new apiError("user login failed ,please try again later", 400));
-  // }
+  if (!checkPassword) {
+    return next(new apiError("user login failed ,please try again later", 400));
+  }
 
   
     // Reset passwordResetVerified flag to null
@@ -156,10 +157,12 @@ exports.logIn = asyncHandler(async (req, res, next) => {
     await loggedIn.save();
 
     const payload = createPayload.createToken({
+      email: loggedIn.email,
       role: loggedIn.role,
       id: loggedIn.id,
+      name: loggedIn.name
     });
-    // console.log(payload);
+     console.log(payload);
     return res.status(200).send({
       message: "Logged in successfully",
       user: { name: loggedIn.name, email: loggedIn.email, role: loggedIn.role },

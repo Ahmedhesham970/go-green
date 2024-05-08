@@ -11,6 +11,8 @@ const auth = require("../middleware/verifyToken");
 const sendEmail = require("../utils/sendMail");
 const User = require("../models/userModel");
 const path = require("path");
+const { timeStamp } = require("console");
+const user = require("../models/userModel");
 require("dotenv").config();
 
 //@desc  Create a new post
@@ -208,3 +210,27 @@ exports.getAllComments = asyncHandler(async (req, res) => {
   // post.comments.populate('user')
   res.send(post);
 });
+
+
+
+// @desc    Get all posts from your following list
+// @route   GET api/post/feed
+// Access   protected
+exports.getFeed = asyncHandler(async (req,res,next) => {
+  const user = await User.findById(req.user.id)
+    .select("-_id name profileImage")
+    .populate({
+      path: "following",
+      select: " -_id name profileImage posts ",
+      populate: { path: "posts", select: "-_id -__v " },
+      options: { sort: { createdAt: -1 } },
+      match: { posts: { $exists: true, $ne: [] } }, // Only populate users who have posts
+    });
+
+  if (!user) {
+    throw new apiError('You must be logged first ',400)
+  }
+ 
+ return res.json(user );
+})
+
