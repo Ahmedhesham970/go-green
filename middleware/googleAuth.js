@@ -33,15 +33,11 @@ passport.use(
       profile,
       done
     ) {
-      // Log the profile information to the console
-      // console.log("Email:", profile.emails[0].value);
-      // console.log("Name:", profile.displayName);
+      
       const email = profile.emails[0].value;
       const name = profile.displayName;
       const profileImageURL = profile.photos[0].value;
-      // console.log(profile);
-      // console.log("Access Token:", accessToken);
-      // console.log("Refresh Token:", refreshToken);
+   
 
       // Passing the user profile to the done callback
       let random =

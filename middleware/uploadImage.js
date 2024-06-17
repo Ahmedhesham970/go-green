@@ -11,9 +11,9 @@ const stream = require("stream");
 const uploadImage=async (req, res, next) => {
     try {
       // Ensure there is a file in the request
-      if (!req.file) {
-        throw new ApiError("No file uploaded.");
-      }
+      // if (!req.file) {
+      //   throw new ApiError("No file uploaded.");
+      // }
 
       let profileImage = req.file.buffer; // Directly use the buffer
       const cloudinaryResult = await cloudinary.uploader.upload_stream(

@@ -9,8 +9,8 @@ const sendEmail = async function (options) {
       port: 465,
       secure: true,
       auth: {
-        user: process.env.MAILER_EMAIL, // Corrected
-        pass: process.env.MAILER_PASSWORD, // Corrected
+        user: process.env.MAILER_EMAIL, 
+        pass: process.env.MAILER_PASSWORD, 
       },
     });
 

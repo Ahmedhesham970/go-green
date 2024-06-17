@@ -7,7 +7,8 @@ const postSchema = new Schema({
   },
   postDate: {
     type: Date,
-    default: Date.now(),
+    default: Date.now
+,
   },
   likes: [
     {
@@ -39,6 +40,7 @@ const postSchema = new Schema({
   images: {
     type: [String],
     min: 1,
+    required: false,
   },
 });
 

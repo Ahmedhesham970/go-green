@@ -29,7 +29,7 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
 
 exports.forgetPassword = asyncHandler(async (req, res, next) => {
   // 1) check if the user exists in the database
-  const User = await user.findById(req.user.id);
+  const User = await user.findOne({email:req.body.email});
   const mail= User.email
    
   if (!mail) {
@@ -107,7 +107,7 @@ exports.verifyPasswordResetCode = asyncHandler(async (req, res, next) => {
 });
 
 exports.setNewPassword = asyncHandler(async (req, res, next) => {
-  const User = await user.findOne({ email: req.user.email });
+  const User = await user.findOne({ email: req.body.email });
 
   if (!User) {
     return next(
@@ -150,9 +150,11 @@ exports.setNewPassword = asyncHandler(async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: "verified \n Your account has been verified successfully ",
+      message: `verified! 
+      Your account has been verified successfully`,
       token: payload,
     });
+
   } catch (error) {
     return next(new apiError("Error setting a new password", 500));
   }

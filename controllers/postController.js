@@ -13,6 +13,7 @@ const User = require("../models/userModel");
 const path = require("path");
 const { timeStamp } = require("console");
 const user = require("../models/userModel");
+const { options } = require("../routers/userRouter");
 require("dotenv").config();
 
 //@desc  Create a new post
@@ -23,7 +24,7 @@ exports.createPost = asyncHandler(async (req, res, next) => {
     const { caption } = req.body;
     // console.log(req.user);
     const publisher = req.user.id;
-    let profileImage = req.file.buffer
+    let profileImage = req.file.buffer;
     console.log(profileImage);
     const user = await User.findById(req.user.id);
     // console.log(user);
@@ -35,7 +36,7 @@ exports.createPost = asyncHandler(async (req, res, next) => {
     const post = await POST.create({
       publisher: publisher,
       caption: caption,
-      images:profileImage,
+      images: profileImage,
       createdAt: timeAndDate,
     });
 
@@ -192,45 +193,61 @@ exports.writeComment = asyncHandler(async (req, res) => {
 // @route   GET api/post/user/comment/:id
 // Access   Protected
 exports.getAllComments = asyncHandler(async (req, res) => {
- 
   const post = await POST.findById(req.params.id)
- 
-  .select("-__v -_id")
+
+    .select("-__v -_id")
     .populate({ path: "comments", select: "-_id" })
     .populate({ path: "publisher", select: "name -_id" })
     .populate({ path: "likes", select: "name -_id" })
-    .populate({path: "comments.user",select: "name profileImage -_id"})
+    .populate({ path: "comments.user", select: "name profileImage -_id" })
     .select({ path: "comments.comment", select: "-id" });
-    
- 
 
-    // console.warn(commentsMap)
+  // console.warn(commentsMap)
   //  console.log(post.comments);
 
   // post.comments.populate('user')
   res.send(post);
 });
 
-
-
 // @desc    Get all posts from your following list
 // @route   GET api/post/feed
 // Access   protected
-exports.getFeed = asyncHandler(async (req,res,next) => {
+exports.getFeed = asyncHandler(async (req, res, next) => {
+  // Find the user and get the list of followed users
   const user = await User.findById(req.user.id)
-    .select("-_id name profileImage")
+    .select("name profileImage -_id ")
     .populate({
       path: "following",
-      select: " -_id name profileImage posts ",
-      populate: { path: "posts", select: "-_id -__v " },
+      select: "posts -_id",
+      populate: {
+        path: "posts",
+        select: "-_id -__v -likes -comments",
+        populate: {
+          path: "publisher",
+          select: "name profileImage -_id ",
+        },
+      },
       options: { sort: { createdAt: -1 } },
       match: { posts: { $exists: true, $ne: [] } }, // Only populate users who have posts
     });
 
   if (!user) {
-    throw new apiError('You must be logged first ',400)
+    throw new apiError("You must be logged in first", 400);
   }
- 
- return res.json(user );
-})
 
+  const followingUsers = user.following;
+
+  // Fetch posts from the followed users
+  const posts = await POST.find({ user: { $in: followingUsers } })
+    .select("-_id -__v -comments ") // Deselect _id and __v
+    .populate("publisher", "name profileImage -_id")
+    .lean();
+
+  // Transform the posts to include likes count
+  const feedNews = posts.map((post) => ({
+    ...post,
+    likes: post.likes.length,
+  }));
+  console.log(feedNews);
+  return res.status(200).json(feedNews);
+});

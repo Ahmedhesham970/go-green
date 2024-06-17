@@ -36,7 +36,7 @@ exports.createUser = asyncHandler(async (req, res, next) => {
   if (password !== confirmPassword) {
     return next(new apiError("Invalid password confirmation.", 400));
   }
-let profileImage=req.file.buffer.toLocaleString()
+  //  let profileImage = req.file.buffer.toLocaleString()||null;
   // 3. Hash the password
   const saltRounds = 8;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -47,9 +47,6 @@ let profileImage=req.file.buffer.toLocaleString()
   // }
 
   // 5. Get the uploaded image path
-   
-
-
 
   // 6. Create a new user object
   const newUser = new user({
@@ -58,7 +55,7 @@ let profileImage=req.file.buffer.toLocaleString()
     password: hashedPassword,
     confirmPassword,
     phone,
-    profileImage: profileImage,
+    // profileImage: profileImage,
     role,
     governorate,
   });
@@ -78,17 +75,19 @@ let profileImage=req.file.buffer.toLocaleString()
     id: newUser.id,
     name: newUser.name,
     google_id: newUser.google_id,
-    email: newUser.email
+    email: newUser.email,
   });
 
   // 8. Save the user and send response
- await newUser.save();
+  await newUser.save();
 
- return res.status(201).json(
-  { message: "Registration successful" ,
-  user:{"email":newUser.email,"name":newUser.name,"role":newUser.role},
-  token:payload
-  });
+  return res
+    .status(201)
+    .json({
+      message: "Registration successful",
+      user: { email: newUser.email, name: newUser.name, role: newUser.role },
+      token: payload,
+    });
 });
 
 // @desc  verify the registration
@@ -140,6 +139,7 @@ exports.logIn = asyncHandler(async (req, res, next) => {
   if (!loggedIn) {
     return next(new apiError("user login failed ,please try again later", 400));
   }
+  console.log(req.body)
 
   const checkPassword = await bcrypt.compare(
     req.body.password,

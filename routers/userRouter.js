@@ -46,13 +46,14 @@ router.get(
     });
   }
 );
+// upload.single("profileImage"),uploadImage,
+router.post(
+  "/register",
+  upload.single("profileImage"),
+  
+  auth.createUser
+);
 
-router.route("/register").post(
-    upload.single("profileImage"),
-    uploadImage,
-    AddingUserValidation,
-    auth.createUser
-  );
 router.route("/login").post(LoginValidator, auth.logIn);
 router.post("/verifyemail", auth.verifyEmail);
 router.put("/:id/follow", authorized.auth, user.follow);
@@ -61,9 +62,9 @@ router.get("/profile", authorized.auth, user.showProfile);
 router
   .route("/changePassword/:id")
   .put(changeUserPasswordValidator, password.changePassword);
-router.post("/forgetpassword", authorized.auth,password.forgetPassword);
-router.post("/verifypassword", authorized.auth, password.verifyPasswordResetCode);
-router.put("/setnewpassword", authorized.auth,password.setNewPassword);
+router.post("/forgetpassword",password.forgetPassword);
+router.post("/verifypassword", password.verifyPasswordResetCode);
+router.put("/setnewpassword",password.setNewPassword);
 router.route("/allusers").get(authorized.auth, authRole(), user.allUsers );
 
 module.exports = router;

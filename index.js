@@ -25,13 +25,8 @@ const cookieParser = require("cookie-parser");
 app.use("/api/user", userRouter);
 app.use("/api/post", postRouter);
 app.use("/api/article", articleRouter);
-app.use(
-  session({
-    secret: process.env.COOKIE_SESSION_KEY || "your_secret_key",
-    resave: false,
-    saveUninitialized: true,
-  })
-);
+app.use(bodyParser.json());
+
 
 // Passport middleware
 app.use(passport.initialize());
