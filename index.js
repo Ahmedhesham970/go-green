@@ -25,24 +25,27 @@ const cookieParser = require("cookie-parser");
 app.use("/api/user", userRouter);
 app.use("/api/post", postRouter);
 app.use("/api/article", articleRouter);
-app.use(bodyParser.json());
-
+app.use(
+  session({
+    secret: process.env.COOKIE_SESSION_KEY || "your_secret_key",
+    resave: false,
+    saveUninitialized: true,
+  })
+);
 
 // Passport middleware
 app.use(passport.initialize());
 app.use(passport.session());
 
-
-
-app.all("*", (req, res, next,err) => {
+app.all("*", (req, res, next, err) => {
   // const err = new Error);
   next(new apiError(`cannot access ${req.originalUrl} : ${err.message} `));
 });
 app.use(globalError);
 
-app.get('/',(req,res)=>{
-  res.status(200).json('welcome to the server GoGreen!!')
-})
+app.get("/", (req, res) => {
+  res.status(200).json("welcome to the server GoGreen!!");
+});
 
 app.listen(process.env.PORT, () =>
   console.log(`Server is running on port ${process.env.PORT}`)
