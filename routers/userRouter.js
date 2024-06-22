@@ -47,13 +47,14 @@ router.get(
   }
 );
 // upload.single("profileImage"),uploadImage,
-router.post(
-  "/register",
+router.post("/register",upload.single("profileImage"),auth.createUser);
+router.patch(
+  "/update",
+  authorized.auth,
   upload.single("profileImage"),
-  
-  auth.createUser
+  uploadImage,
+  user.updateProfile
 );
-
 router.route("/login").post(LoginValidator, auth.logIn);
 router.post("/verifyemail", auth.verifyEmail);
 router.put("/:id/follow", authorized.auth, user.follow);

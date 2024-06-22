@@ -15,6 +15,7 @@ const post = require("../models/postModel");
 const { emailMessage } = require("../utils/emailVerficationMessage");
 const { profile } = require("console");
 // const { post } = require("../routers/userRouter");
+const createPayload = require("../middleware/verifyToken");
 
 require("dotenv").config();
 
@@ -35,7 +36,9 @@ exports.allUsers = asyncHandler(async (req, res, next) => {
 exports.follow = asyncHandler(async (req, res, next) => {
   const User = await user.findById(req.user.id);
   const userWhoFollowed = await user.findById(req.params.id);
-  if (req.user.id == req.params.id) {
+  console.log({ "id from params": userWhoFollowed.id });
+
+  if (User.id === userWhoFollowed.id) {
     throw new apiError("You cannot follow yourself", 405);
   }
   if (User.following.includes(userWhoFollowed.id)) {
@@ -45,13 +48,17 @@ exports.follow = asyncHandler(async (req, res, next) => {
     );
   }
 
-  await User.updateOne({ $push: { following: userWhoFollowed } });
-  await userWhoFollowed.updateOne({ $push: { followers: User } });
+  try {
+    await User.updateOne({ $push: { following: userWhoFollowed } });
+    await userWhoFollowed.updateOne({ $push: { followers: User } });
 
-  return res.json({
-    success: true,
-    message: `You are now following ${userWhoFollowed.name}`,
-  });
+    return res.json({
+      success: true,
+      message: `You are now following ${userWhoFollowed.name}`,
+    });
+  } catch (e) {
+    throw new apiError(e.message);
+  }
 });
 /// @desc    unfollow the users
 // @route   PUT /api/user/:id/like
@@ -110,15 +117,12 @@ exports.showProfile = asyncHandler(async (req, res, next) => {
     const User = req.user;
     const userProfile = await user
       .findById(User.id)
-      .populate('following')
-      .select(
-        "-role -__v -_id -password -email -emailVerified -createdAt  "
-      );
-    
+      .populate("following")
+      .select("-role -__v -_id -password -email -emailVerified -createdAt  ");
 
-     const following=userProfile.following.length
-       const followers = userProfile.followers.length;
-      const posts = userProfile.posts.length;
+    const following = userProfile.following.length;
+    const followers = userProfile.followers.length;
+    const posts = userProfile.posts.length;
     const data = res.status(200).json({
       message: "success",
       data: {
@@ -131,5 +135,30 @@ exports.showProfile = asyncHandler(async (req, res, next) => {
     });
   } catch (error) {
     throw new apiError(error, 500);
+  }
+});
+
+exports.updateProfile = asyncHandler(async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    let profileImage = req.file.buffer.toString();
+    const updatedUser = await user.findByIdAndUpdate(
+      req.user.id,
+      { name, profileImage }, // Update name and profileImage fields
+      { new: true, runValidators: true }
+    );
+    const payload = createPayload.createToken({
+      name: updatedUser.name,
+      id: updatedUser.id,
+    });
+    res.send({
+      name: updatedUser.name,
+      email: updatedUser.email,
+      profileImage: updatedUser.profileImage,
+      payload,
+    });
+  } catch (err) {
+    throw new apiError(err.message, 400);
   }
 });
