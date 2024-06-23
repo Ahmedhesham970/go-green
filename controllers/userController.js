@@ -137,10 +137,12 @@ exports.showProfile = asyncHandler(async (req, res, next) => {
     throw new apiError(error, 500);
   }
 });
-
+// //@desc update profile
+// //@route PATCH /api/user/update
+// //Access protected
 exports.updateProfile = asyncHandler(async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, email } = req.body;
 
     let profileImage = req.file.buffer.toString();
     const updatedUser = await user.findByIdAndUpdate(
@@ -161,4 +163,37 @@ exports.updateProfile = asyncHandler(async (req, res) => {
   } catch (err) {
     throw new apiError(err.message, 400);
   }
+});
+
+exports.updateRecycleAccount = asyncHandler(async (req, res, next) => {
+  const User = await user.findById(req.user.id);
+  try {
+    if (!User) {
+      throw new apiError("User not found", 404);
+    }
+    User.points += req.body.newPoints;
+    User.recycles += 1;
+    
+      if (User.points > 0 && User.points < 100) {
+        User.rank = "None";
+      } else if (User.points > 99 && User.points < 300) {
+        User.rank = "Bronze";
+      } else if (User.points > 299 && User.points < 500) {
+        User.rank = "Silver";
+      } else if (User.points > 499 && User.points < 700) {
+        User.rank = "Gold";
+      } else {
+        User.rank = "Titanium";
+      }
+       
+    
+  } catch (err) {
+    throw new apiError(`error occurred \n ${err}`, 500);
+  }
+  
+  
+  await User.save();
+  return res
+    .status(200)
+    .json({ message: "Scanned successfully!", points: req.body.newPoints });
 });

@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const db = require("../dataBase/dataBase");
-const post =require('./postModel')
+const post = require("./postModel");
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -106,13 +106,30 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user",
     },
+    recycles: {
+      type: Number,
+      default: 0,
+    },
+    points: {
+      type: Number,
+      default: 0,
+    },
+    rank: {
+      type: String,
+      enum: ["None", "Bronze", "Silver", "Gold", "Titanium"],
+      default: "None",
+    },
     active: {
       type: Boolean,
       default: true,
     },
   },
-  { timeStamps: true }
+  { timestamps: true }
 );
+
+
+userSchema.set("toJSON", { virtuals: true });
+userSchema.set("toObject", { virtuals: true });
 
 const user = mongoose.model("User", userSchema);
 

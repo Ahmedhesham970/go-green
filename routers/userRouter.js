@@ -55,17 +55,16 @@ router.patch(
   uploadImage,
   user.updateProfile
 );
-router.route("/login").post(LoginValidator, auth.logIn);
+router.post("/login",LoginValidator, auth.logIn);
 router.post("/verifyemail", auth.verifyEmail);
 router.put("/:id/follow", authorized.auth, user.follow);
 router.put("/:id/unfollow", authorized.auth, user.unfollow);
 router.get("/profile", authorized.auth, user.showProfile);
-router
-  .route("/changePassword/:id")
-  .put(changeUserPasswordValidator, password.changePassword);
+router.patch("/updatePoints", authorized.auth, user.updateRecycleAccount);
+router.put("/changePassword/:id",changeUserPasswordValidator, password.changePassword);
 router.post("/forgetpassword",password.forgetPassword);
 router.post("/verifypassword", password.verifyPasswordResetCode);
 router.put("/setnewpassword",password.setNewPassword);
-router.route("/allusers").get(authorized.auth, authRole(), user.allUsers );
+router.get("/allusers",authorized.auth, authRole(), user.allUsers );
 
 module.exports = router;
