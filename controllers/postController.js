@@ -238,7 +238,7 @@ exports.getFeed = asyncHandler(async (req, res, next) => {
   const followingUsers = user.following;
 
   // Fetch posts from the followed users
-  const posts = await POST.find({ user: { $in: followingUsers } })
+  const posts = await POST.find()
     .select("-_id -__v -comments ") // Deselect _id and __v
     .populate("publisher", "name profileImage -_id")
     .lean();
