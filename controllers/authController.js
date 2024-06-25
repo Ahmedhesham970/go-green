@@ -162,10 +162,9 @@ exports.logIn = asyncHandler(async (req, res, next) => {
       id: loggedIn.id,
       name: loggedIn.name
     });
-     console.log(payload);
     return res.status(200).send({
       message: "Logged in successfully",
-      user: { name: loggedIn.name, email: loggedIn.email, role: loggedIn.role },
+      user: { name: loggedIn.name, email: loggedIn.email, points:loggedIn.points ,recycles:loggedIn.recycles },
       token: payload,
     });
   

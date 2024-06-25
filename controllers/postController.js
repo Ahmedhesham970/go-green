@@ -248,6 +248,5 @@ exports.getFeed = asyncHandler(async (req, res, next) => {
     ...post,
     likes: post.likes.length,
   }));
-  console.log(feedNews);
   return res.status(200).json(feedNews);
 });
