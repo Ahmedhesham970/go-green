@@ -49,7 +49,7 @@ router.get(
   }
 );
 // upload.single("profileImage"),uploadImage,
-router.post("/register",upload.single("profileImage"),auth.createUser);
+router.post("/register", upload.single("profileImage"), auth.createUser);
 router.post("/pushNotifications", notification.sendNotification);
 router.patch(
   "/update",
@@ -58,17 +58,21 @@ router.patch(
   uploadImage,
   user.updateProfile
 );
-router.post("/login",LoginValidator, auth.logIn);
+router.post("/login", LoginValidator, auth.logIn);
 router.post("/verifyemail", auth.verifyEmail);
 router.put("/:id/follow", authorized.auth, user.follow);
 router.put("/:id/unfollow", authorized.auth, user.unfollow);
 router.get("/profile", authorized.auth, user.showProfile);
 router.get("/:name/userProfile", authorized.auth, user.showUserProfile);
 router.patch("/updatePoints", authorized.auth, user.updateRecycleAccount);
-router.put("/changePassword/:id",changeUserPasswordValidator, password.changePassword);
-router.post("/forgetpassword",password.forgetPassword);
+router.put(
+  "/changePassword/:id",
+  changeUserPasswordValidator,
+  password.changePassword
+);
+router.post("/forgetpassword", password.forgetPassword);
 router.post("/verifypassword", password.verifyPasswordResetCode);
-router.put("/setnewpassword",password.setNewPassword);
-router.get("/allusers",authorized.auth, authRole(), user.allUsers );
+router.put("/setnewpassword", password.setNewPassword);
+router.get("/allusers", authorized.auth, authRole(), user.allUsers);
 
 module.exports = router;
