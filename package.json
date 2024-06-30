@@ -25,6 +25,8 @@
     "express-async-handler": "^1.2.0",
     "express-session": "^1.18.0",
     "express-validator": "^7.0.1",
+    "firebase": "^10.12.2",
+    "firebase-admin": "^12.2.0",
     "google-auth-library": "^9.7.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.3.0",

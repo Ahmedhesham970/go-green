@@ -20,7 +20,6 @@ const uploadImage = async (req, res, next) => {
         if (error) {
           return new ApiError(error.message);
         } else {
-          console.log("Upload successful:", result.secure_url);
           req.file.buffer = result.secure_url;
           next();
         }
@@ -37,7 +36,6 @@ const uploadImage = async (req, res, next) => {
         if (error) {
           throw error;
         } else {
-          console.log("Upload successful:", result.secure_url);
           req.file.buffer = result.secure_url; // Store the URL, not the buffer
           next();
         }

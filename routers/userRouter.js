@@ -11,6 +11,7 @@ const cloudinary = require("../utils/cloudinaryConfig");
 const stream = require("stream");
 const uploadImage = require("../middleware/uploadImage");
 const passport = require("passport");
+const notification = require("../utils/pushNotification");
 const googleAuth = require("../middleware/googleAuth");
 const authRole = require("../middleware/AuthRole");
 const {
@@ -21,6 +22,7 @@ const {
 const uploadFile = require("../middleware/multerConfig");
 const { validationResult } = require("express-validator");
 const authorized = require("../middleware/verifyToken");
+const { sendNotification } = require("../utils/pushNotification");
 require("../middleware/googleAuth");
 router.get(
   "/auth/google",
@@ -48,6 +50,7 @@ router.get(
 );
 // upload.single("profileImage"),uploadImage,
 router.post("/register",upload.single("profileImage"),auth.createUser);
+router.post("/pushNotifications", notification.sendNotification);
 router.patch(
   "/update",
   authorized.auth,
@@ -60,6 +63,7 @@ router.post("/verifyemail", auth.verifyEmail);
 router.put("/:id/follow", authorized.auth, user.follow);
 router.put("/:id/unfollow", authorized.auth, user.unfollow);
 router.get("/profile", authorized.auth, user.showProfile);
+router.get("/:name/userProfile", authorized.auth, user.showUserProfile);
 router.patch("/updatePoints", authorized.auth, user.updateRecycleAccount);
 router.put("/changePassword/:id",changeUserPasswordValidator, password.changePassword);
 router.post("/forgetpassword",password.forgetPassword);

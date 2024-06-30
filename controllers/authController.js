@@ -15,8 +15,7 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const passport = require("passport");
 const createPayload = require("../middleware/verifyToken");
 const { emailMessage } = require("../utils/emailVerficationMessage");
-const cloudinary= require("cloudinary").v2;
-
+const cloudinary = require("cloudinary").v2;
 
 require("dotenv").config();
 
@@ -81,13 +80,11 @@ exports.createUser = asyncHandler(async (req, res, next) => {
   // 8. Save the user and send response
   await newUser.save();
 
-  return res
-    .status(201)
-    .json({
-      message: "Registration successful",
-      user: { email: newUser.email, name: newUser.name, role: newUser.role },
-      token: payload,
-    });
+  return res.status(201).json({
+    message: "Registration successful",
+    user: { email: newUser.email, name: newUser.name, role: newUser.role },
+    token: payload,
+  });
 });
 
 // @desc  verify the registration
@@ -132,14 +129,14 @@ exports.verifyEmail = asyncHandler(async (req, res, next) => {
 
 // @desc    Login User
 // @route   POST /api/login
-// Access   Public
+// Access   Protected
 exports.logIn = asyncHandler(async (req, res, next) => {
   const loggedIn = await user.findOne({ email: req.body.email });
 
   if (!loggedIn) {
     return next(new apiError("user login failed ,please try again later", 400));
   }
-  console.log(req.body)
+  console.log(req.body);
 
   const checkPassword = await bcrypt.compare(
     req.body.password,
@@ -150,23 +147,25 @@ exports.logIn = asyncHandler(async (req, res, next) => {
     return next(new apiError("user login failed ,please try again later", 400));
   }
 
-  
-    // Reset passwordResetVerified flag to null
+  // Reset passwordResetVerified flag to null
 
-    // Save the updated user data
-    await loggedIn.save();
+  // Save the updated user data
+  await loggedIn.save();
 
-    const payload = createPayload.createToken({
+  const payload = createPayload.createToken({
+    email: loggedIn.email,
+    role: loggedIn.role,
+    id: loggedIn.id,
+    name: loggedIn.name,
+  });
+  return res.status(200).send({
+    message: "Logged in successfully",
+    user: {
+      name: loggedIn.name,
       email: loggedIn.email,
-      role: loggedIn.role,
-      id: loggedIn.id,
-      name: loggedIn.name
-    });
-    return res.status(200).send({
-      message: "Logged in successfully",
-      user: { name: loggedIn.name, email: loggedIn.email, points:loggedIn.points ,recycles:loggedIn.recycles },
-      token: payload,
-    });
-  
+      points: loggedIn.points,
+      recycles: loggedIn.recycles,
+    },
+    token: payload,
+  });
 });
-
