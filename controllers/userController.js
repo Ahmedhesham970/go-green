@@ -17,7 +17,6 @@ const { profile } = require("console");
 // const { post } = require("../routers/userRouter");
 const createPayload = require("../middleware/verifyToken");
 const admin = require("firebase-admin");
-const serviceAccount = require("../utils/eloquent-glow-406021-firebase-adminsdk-wkgoe-a9789d9ada.json");
 
 require("dotenv").config();
 

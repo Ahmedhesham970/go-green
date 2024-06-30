@@ -2,7 +2,6 @@ const express = require("express");
 const admin = require("firebase-admin");
 const asyncHandler = require("express-async-handler");
 const User= require("../models/userModel")
-const serviceAccount = require("../utils/eloquent-glow-406021-firebase-adminsdk-wkgoe-a9789d9ada.json");
 
 admin.initializeApp({
   credential: admin.credential.cert({
