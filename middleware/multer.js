@@ -17,7 +17,7 @@ const storage = multer.memoryStorage({
   filename: (req, file, cb) => {
     const picExtension = file.mimetype.split("/")[1];
     const picName = `user-${Date.now()}.${picExtension}`;
-     req.file.profileImage = picName;
+    req.file.profileImage = picName;
     cb(null, picName);
   },
 });
@@ -33,4 +33,4 @@ const fileFilter = (req, file, cb, next) => {
 
 const upload = multer({ storage: storage, fileFilter: fileFilter });
 
-module.exports =upload;
+module.exports = upload;
