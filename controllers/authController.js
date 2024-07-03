@@ -165,6 +165,7 @@ exports.logIn = asyncHandler(async (req, res, next) => {
       email: loggedIn.email,
       points: loggedIn.points,
       recycles: loggedIn.recycles,
+      profilePicture : loggedIn.profileImage
     },
     token: payload,
   });

@@ -10,21 +10,10 @@ const uploadImage = async (req, res, next) => {
   try {
     // Ensure there is a file in the request
     if (!req.file) {
-      throw new ApiError("No file uploaded.");
+      throw new ApiError("No file uploaded.", 400);
     }
 
     let profileImage = req.file.buffer; // Directly use the buffer
-    const cloudinaryResult = await cloudinary.uploader.upload_stream(
-      {},
-      (error, result) => {
-        if (error) {
-          return new ApiError(error.message);
-        } else {
-          req.file.buffer = result.secure_url;
-          next();
-        }
-      }
-    );
 
     // Create a stream and pipe the buffer to Cloudinary
     const uploadStream = cloudinary.uploader.upload_stream(
@@ -34,7 +23,13 @@ const uploadImage = async (req, res, next) => {
       },
       (error, result) => {
         if (error) {
-          throw error;
+          console.error(`Cloudinary error: \n ${error}`);
+          return next(
+            new ApiError(
+              `Failed to upload file to Cloudinary: ${error.message}`,
+              400
+            )
+          );
         } else {
           req.file.buffer = result.secure_url; // Store the URL, not the buffer
           next();
@@ -48,8 +43,9 @@ const uploadImage = async (req, res, next) => {
   } catch (error) {
     console.error(`Cloudinary error: \n ${error}`);
     return next(
-      new ApiError(`Failed to upload file to Cloudinary ${error}`, 400)
+      new ApiError(`Failed to upload file to Cloudinary: ${error.message}`, 500)
     );
   }
 };
+
 module.exports = uploadImage;

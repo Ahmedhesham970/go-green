@@ -55,7 +55,8 @@ exports.createPost = asyncHandler(async (req, res, next) => {
       path: "publisher",
       select: "name -_id",
     });
-    res.json({ message: "new post !", post });
+    res.json({ message: "new post !", name:post.publisher, });
+    console.log({ message: "new post !", post });
   } catch (error) {
     console.error("Error creating post:", error);
     next(new apiError(error, 400));

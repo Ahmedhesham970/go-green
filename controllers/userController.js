@@ -171,7 +171,7 @@ exports.showUserProfile = asyncHandler(async (req, res) => {
     const name = req.params.name;
     const User = await user
       .findOne({ name: name })
-      .populate({ path: "posts", select: "caption -_id images " });
+      .populate({ path: "posts", select: "-_id " });
     if (!User) {
       throw new apiError(`There is no user with ${name}`, 404);
     }

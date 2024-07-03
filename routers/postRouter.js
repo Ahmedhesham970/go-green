@@ -11,12 +11,13 @@ const stream = require("stream");
 const upload = require("../middleware/multer");
 const uploadImage = require("../middleware/uploadPostImage");
 
-
-
-
-
-
-router.post("/new", auth.auth, upload.single("images"),uploadImage, post.createPost);
+router.post(
+  "/new",
+  auth.auth,
+  upload.single("images"),
+  uploadImage,
+  post.createPost
+);
 router.put(
   "/:id/update",
   auth.auth,
@@ -24,11 +25,11 @@ router.put(
   uploadImage,
   post.updatePost
 );
-router.patch("/:id/like", auth.auth,post.likePost)
-router.get("/:id", auth.auth,post.getPost);
+router.patch("/:id/like", auth.auth, post.likePost);
+router.get("/:id", auth.auth, post.getPost);
 router.get("/user/feed", auth.auth, post.getFeed);
-router.get("/user/:id", auth.auth,post.getAllPostsForUser);
-router.patch("/user/comment/:id", auth.auth,post.writeComment);
-router.get("/user/comment/:id", auth.auth,post.getAllComments);
+router.get("/user/:id", auth.auth, post.getAllPostsForUser);
+router.patch("/user/comment/:id", auth.auth, post.writeComment);
+router.get("/user/comment/:id", auth.auth, post.getAllComments);
 
 module.exports = router;
