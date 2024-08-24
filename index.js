@@ -9,10 +9,7 @@ const morgan = require("morgan");
 require("dotenv").config();
 const { error } = require("console");
 const app = express();
-const compression= require("compression");
-const cors = require("cors");
-app.use(compression)
-app.use(cors)
+
 const globalError = require("./middleware/errorMiddleware");
 app.use(express.json());
 const database = require("./dataBase/dataBase");
