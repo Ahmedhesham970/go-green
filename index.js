@@ -9,12 +9,17 @@ const morgan = require("morgan");
 require("dotenv").config();
 const { error } = require("console");
 const app = express();
+const compression= require("compression");
+const cors = require("cors");
+app.use(compression)
+app.use(cors)
 const globalError = require("./middleware/errorMiddleware");
 app.use(express.json());
 const database = require("./dataBase/dataBase");
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 const userRouter = require("./routers/userRouter");
 const postRouter = require("./routers/postRouter");
+const machineRouter = require("./routers/machineRouter");
 const passport = require("passport");
 const articleRouter = require("./routers/articlesRouter");
 const apiError = require("./utils/ApiError");
@@ -25,6 +30,7 @@ const cookieParser = require("cookie-parser");
 app.use("/api/user", userRouter);
 app.use("/api/post", postRouter);
 app.use("/api/article", articleRouter);
+app.use("/api/machine",machineRouter);
 app.use(
   session({
     secret: process.env.COOKIE_SESSION_KEY || "your_secret_key",

@@ -1,0 +1,62 @@
+[
+  {
+    "_id": "66b6387f2699f1c63f2799c7",
+    "name": "simba kindergarden station",
+    "location": {
+      "type": "Point",
+      "coordinates": [30.6124574, 32.2993704]
+    },
+    "createdAt": "2024-08-09T15:40:47.707Z",
+    "__v": 0
+  },
+  {
+    "_id": "66b638b52699f1c63f2799c9",
+    "name": "masjed noura station",
+    "location": {
+      "type": "Point",
+      "coordinates": [30.6139573, 32.2995589]
+    },
+    "createdAt": "2024-08-09T15:41:41.159Z",
+    "__v": 0
+  },
+  {
+    "_id": "66b6b7975e388f50f5c337c8",
+    "name": "5% station",
+    "location": {
+      "type": "Point",
+      "coordinates": [30.6124478, 32.2972621]
+    },
+    "createdAt": "2024-08-10T00:43:03.561Z",
+    "__v": 0
+  },
+  {
+    "_id": "66b6b7fa5e388f50f5c337ca",
+    "name": "car wash station",
+    "location": {
+      "type": "Point",
+      "coordinates": [30.6123279, 32.2974444]
+    },
+    "createdAt": "2024-08-10T00:44:42.544Z",
+    "__v": 0
+  },
+  {
+    "_id": "66b6b84e5e388f50f5c337cc",
+    "name": "veterinary hospital station ",
+    "location": {
+      "type": "Point",
+      "coordinates": [30.6120702, 32.2977283]
+    },
+    "createdAt": "2024-08-10T00:46:06.699Z",
+    "__v": 0
+  },
+  {
+    "_id": "66b6b8c15254fa032e12dd5e",
+    "name": "ismailia ceramic station ",
+    "location": {
+      "coordinates": [30.6137543, 32.296831],
+      "type": "Point"
+    },
+    "createdAt": "2024-08-10T00:48:01.700Z",
+    "__v": 0
+  }
+]
